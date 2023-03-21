@@ -1,12 +1,14 @@
 const Sequelize = require('sequelize');
 require("dotenv").config();
 
+const {NAME, PORTDB, PASSWORD, USER, HOST } = require('../config.js')
 
 
-const sequelize = new Sequelize(process.env.DB, process.env.ADMIN, process.env.PASSWORD, {
-    host: process.env.HOST,
+
+const sequelize = new Sequelize(NAME, USER, PASSWORD, {
+    host: HOST,
     dialect: process.env.DIALECT,
-    port: process.env.PORTDB
+    port: PORTDB
 });
 
 sequelize.sync({ force: false }).then(() => {

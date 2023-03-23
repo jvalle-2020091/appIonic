@@ -8,7 +8,6 @@ const auth = require('../middlewares/auth');
 /* GET users listing. */
 router.post('/login', UserController.login);
 router.put('/updatePassword', UserController.updatePassword);
-router.post('/loginBiometric/:uuid', UserController.loginBiometric);
 
 router.post('/register', auth.isLoged, upload, UserController.register);
 router.get('/getUsers',auth.isLoged, UserController.getUsers);
@@ -21,9 +20,11 @@ router.get('/getImage/:fileName', upload, UserController.getImage);
 
 //Device
 
-router.post('/registerDevice', UserController.registerDevice);
+router.post('/registerDevice', auth.isLoged, UserController.registerDevice);
 router.get('/getDevice/:uuid', UserController.getDevice);
 router.get('/getDevices/:UserId', UserController.getDevices);
+router.put('/updateDevice/:uuid', auth.isLoged, UserController.updateDevice);
+router.post('/loginBiometric/:uuid', UserController.loginBiometric);
 
 
 module.exports = router;

@@ -581,8 +581,8 @@ exports.loginBiometric = async (req, res) => {
         });
 
         if (user.deleted) return res.status(400).send({ message: "ACCOUNT DELETED" });
-         if (user.locked) 
-         if (user.lockUntil == 0) return res.status(400).send({ message: "Your account has been blocked by an administrator." });
+        if (user.locked)
+            if (user.lockUntil == 0) return res.status(400).send({ message: "Your account has been blocked by an administrator." });
 
         const token = await jwt.createToken(user);
         return res.status(200).send({ message: "Logged In", token, user });
@@ -592,4 +592,49 @@ exports.loginBiometric = async (req, res) => {
         return error;
     }
 }
+
+exports.updateDevice = async (req, res) => {
+    try {
+        const uuid = req.params.uuid;
+        const params = req.body
+
+        let data = {
+            UserId: params.UserId,
+            uuid: req.params.uuid,
+            name: params.name,
+            biometric: params.biometric
+        }
+
+        let device = await Device.findOne({
+            where: {
+                uuid: uuid
+            }
+        });
+
+        if (!device) {
+            device = await Device.create(data);
+            return res.status(200).send({ device });
+        }
+
+        await Device.update(
+            params
+            , {
+                where: {
+                    uuid: uuid
+                }
+            });
+        device = await Device.findOne({
+            where: {
+                uuid: uuid
+            }
+        });
+
+        return res.status(200).send({ device });
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+}
+
+
 

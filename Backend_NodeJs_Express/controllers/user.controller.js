@@ -14,6 +14,7 @@ const Function = require("../models/Functions.model");
 const { QueryTypes } = require('sequelize');
 const sequelize = require("../bin/sequelize");
 const { Op } = require('sequelize');
+const CryptoJS = require("crypto-js");
 
 
 // ADMIN
@@ -537,11 +538,11 @@ exports.registerDevice = async (req, res) => {
 exports.getDevice = async (req, res) => {
     try {
         const uuid = req.params.uuid;
-        const device = await Device.findOne({
-            where: {
-                uuid: uuid
-            }
-        });
+        const [device] = await sequelize.query(`
+        select d.*, u.username 
+        from devices d 
+        inner join users u on d.UserId = u.id 
+        where d.uuid = '${uuid}'`);
         return res.status(200).send({ device })
     } catch (error) {
         console.log(error);
@@ -568,22 +569,27 @@ exports.getDevices = async (req, res) => {
 // Realizar login con biometría
 exports.loginBiometric = async (req, res) => {
     try {
-        const uuid = req.params.uuid;
-        const userId = await Device.findOne({
+        const { btp, uuid } = req.body;
+
+        const device = await Device.findOne({
             where: {
                 uuid: uuid
             }
         });
+
         const user = await User.findOne({
             where: {
-                id: userId.UserId
+                id: device.UserId
             }
         });
+        const bptBackend = CryptoJS.SHA256(uuid + user.userName).toString(CryptoJS.enc.Hex);
+        if (btp != bptBackend) return res.status(400).send({ message: "Device not exists" });
         if (user.deleted) return res.status(400).send({ message: "ACCOUNT DELETED" });
         if (user.locked)
             if (user.lockUntil == 0)
                 return res.status(400).send({ message: "Your account has been blocked by an administrator." });
         const token = await jwt.createToken(user);
+
         return res.status(200).send({ message: "Logged In", token, user });
     } catch (error) {
         console.log(error);

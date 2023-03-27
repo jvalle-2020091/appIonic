@@ -23,7 +23,7 @@ router.get('/getDevice/:uuid', UserController.getDevice);
 router.get('/getDevices/:UserId', UserController.getDevices);
 router.put('/updateDevice/:uuid', auth.isLoged, UserController.updateDevice);
 router.delete('/deleteDevice/:uuid', auth.isLoged, UserController.deleteDevice);
-router.post('/loginBiometric/:uuid', UserController.loginBiometric);
+router.post('/loginBiometric', UserController.loginBiometric);
 
 
 module.exports = router;

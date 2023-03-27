@@ -526,7 +526,7 @@ exports.registerDevice = async (req, res) => {
         } else {
             device = await Device.create(data);
         }
-        return res.send({ message: ' Device register', device });
+        return res.send({ message: 'Device register', device });
 
     } catch (error) {
         console.log(error);
@@ -538,11 +538,32 @@ exports.registerDevice = async (req, res) => {
 exports.getDevice = async (req, res) => {
     try {
         const uuid = req.params.uuid;
-        const [device] = await sequelize.query(`
-        select d.*, u.username 
-        from devices d 
-        inner join users u on d.UserId = u.id 
-        where d.uuid = '${uuid}'`);
+        let device = null;
+
+        // const [device] = await sequelize.query(`
+        // select d.*, u.username 
+        // from devices d 
+        // inner join users u on d.UserId = u.id 
+        // where d.uuid = '${uuid}'`);
+        
+        const _device = await User.findOne({
+            include: {
+                model: Device, required: true,
+                where: {
+                    uuid: uuid
+                }
+            },
+        });
+
+        if(_device != null){
+            device = {
+                uuid: _device.Devices[0].uuid,
+                name: _device.Devices[0].name,
+                Userid: _device.Devices[0].UserId,
+                biometric: _device.Devices[0].biometric,
+                username: _device.username,
+            }
+        }
         return res.status(200).send({ device })
     } catch (error) {
         console.log(error);

@@ -481,18 +481,18 @@ exports.permissions_id = async (req, res) => {
     }
 }
 
+// ------ DEVICES ------
+
+// Registrar dispositivos
 exports.registerDevice = async (req, res) => {
     try {
-
         const params = req.body;
-
         let data = {
             UserId: params.UserId,
             uuid: params.uuid,
             name: params.name,
             biometric: params.biometric
         }
-
         const msg = validate.validateData(data);
         if (msg) return res.status(400).send(msg);
 
@@ -525,7 +525,6 @@ exports.registerDevice = async (req, res) => {
         } else {
             device = await Device.create(data);
         }
-
         return res.send({ message: ' Device register', device });
 
     } catch (error) {
@@ -534,10 +533,10 @@ exports.registerDevice = async (req, res) => {
     }
 }
 
+// Ver dispositivo
 exports.getDevice = async (req, res) => {
     try {
         const uuid = req.params.uuid;
-
         const device = await Device.findOne({
             where: {
                 uuid: uuid
@@ -550,6 +549,7 @@ exports.getDevice = async (req, res) => {
     }
 }
 
+// Ver dispositivos de cada usuario
 exports.getDevices = async (req, res) => {
     try {
         const userId = req.params.UserId;
@@ -565,6 +565,7 @@ exports.getDevices = async (req, res) => {
     }
 }
 
+// Realizar login con biometría
 exports.loginBiometric = async (req, res) => {
     try {
         const uuid = req.params.uuid;
@@ -573,26 +574,24 @@ exports.loginBiometric = async (req, res) => {
                 uuid: uuid
             }
         });
-
         const user = await User.findOne({
             where: {
                 id: userId.UserId
             }
         });
-
         if (user.deleted) return res.status(400).send({ message: "ACCOUNT DELETED" });
         if (user.locked)
-            if (user.lockUntil == 0) return res.status(400).send({ message: "Your account has been blocked by an administrator." });
-
+            if (user.lockUntil == 0)
+                return res.status(400).send({ message: "Your account has been blocked by an administrator." });
         const token = await jwt.createToken(user);
         return res.status(200).send({ message: "Logged In", token, user });
-
     } catch (error) {
         console.log(error);
         return error;
     }
 }
 
+//Actualizar dispositivo o registrar si no existe
 exports.updateDevice = async (req, res) => {
     try {
         const uuid = req.params.uuid;
@@ -628,13 +627,38 @@ exports.updateDevice = async (req, res) => {
                 uuid: uuid
             }
         });
-
         return res.status(200).send({ device });
+
     } catch (error) {
         console.log(error);
         return error;
     }
 }
 
+// Eliminar dispositivo
+exports.deleteDevice = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const uuid = req.params.uuid;
 
+        const device = await Device.findOne({
+            where: {
+                uuid: uuid
+            }
+        });
+        if (device.UserId != userId) return res.send({ message: 'This device does not belong to you' })
+
+        Device.destroy({
+            where: {
+                uuid: uuid
+            }
+        });
+        return res.status(200).send({ message: 'Device deleted sucessfully' });
+
+    } catch (err) {
+        console.log(err);
+        return err;
+    }
+
+}
 

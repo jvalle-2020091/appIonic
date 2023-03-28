@@ -559,7 +559,7 @@ exports.getDevice = async (req, res) => {
             device = {
                 uuid: _device.Devices[0].uuid,
                 name: _device.Devices[0].name,
-                Userid: _device.Devices[0].UserId,
+                UserId: _device.Devices[0].UserId,
                 biometric: _device.Devices[0].biometric,
                 username: _device.username,
             }

@@ -603,8 +603,11 @@ exports.loginBiometric = async (req, res) => {
                 id: device.UserId
             }
         });
+        
         const bptBackend = CryptoJS.SHA256(uuid + user.userName).toString(CryptoJS.enc.Hex);
         if (btp != bptBackend) return res.status(400).send({ message: "Device not exists" });
+        console.log('bptBackend', bptBackend);
+        console.log('btp', btp);
         if (user.deleted) return res.status(400).send({ message: "ACCOUNT DELETED" });
         if (user.locked)
             if (user.lockUntil == 0)

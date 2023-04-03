@@ -358,12 +358,19 @@ exports.updatePasswordByAdmin = async (req, res) => {
                 id: idUser
             }
         });
-        const userUpdate = await User.update({
+        await User.update({
             password: await validate.encrypt(tempPassword),
             needChangePassword: true
         }, {
             where: {
                 id: idUser
+            }
+        });
+        await Device.update({
+            biometric: false,
+        }, {
+            where: {
+                UserId: idUser
             }
         });
         this.sendCredentials(user, tempPassword);
@@ -471,7 +478,6 @@ exports.permissions_id = async (req, res) => {
     try {
         const idUser = req.params.id;
         const idFunctions = [];
-
         const functionsSeq = await sequelize.query(`SELECT DISTINCT RF.FunctionId FROM user_rols UR inner join role_functions RF on UR.RolId = RF.RolId where UR.UserId = ${idUser};`, { type: QueryTypes.SELECT });
         for (var i in functionsSeq) {
             idFunctions.push(functionsSeq[i].FunctionId);
@@ -483,7 +489,6 @@ exports.permissions_id = async (req, res) => {
 }
 
 // ------ DEVICES ------
-
 // Registrar dispositivos
 exports.registerDevice = async (req, res) => {
     try {
@@ -496,23 +501,19 @@ exports.registerDevice = async (req, res) => {
         }
         const msg = validate.validateData(data);
         if (msg) return res.status(400).send(msg);
-
         const existDevice = await Device.findOne({
             where: {
                 uuid: data.uuid,
                 UserId: { [Op.ne]: data.UserId }
             }
         });
-
         if (existDevice) return res.status(400).send({ message: 'The device is already assigned to a user' })
-
         const idDevice = await Device.findOne({
             where: {
                 uuid: data.uuid,
                 UserId: { [Op.eq]: data.UserId }
             }
         });
-
         let device;
         if (idDevice) {
             device = await Device.update({
@@ -526,7 +527,7 @@ exports.registerDevice = async (req, res) => {
         } else {
             device = await Device.create(data);
         }
-        return res.send({ message: 'Device register', device });
+        return res.send({ device });
 
     } catch (error) {
         console.log(error);
@@ -538,14 +539,7 @@ exports.registerDevice = async (req, res) => {
 exports.getDevice = async (req, res) => {
     try {
         const uuid = req.params.uuid;
-        let device = null;
-
-        // const [device] = await sequelize.query(`
-        // select d.*, u.username 
-        // from devices d 
-        // inner join users u on d.UserId = u.id 
-        // where d.uuid = '${uuid}'`);
-        
+        let device = null;     
         const _device = await User.findOne({
             include: {
                 model: Device, required: true,
@@ -554,7 +548,6 @@ exports.getDevice = async (req, res) => {
                 }
             },
         });
-
         if(_device != null){
             device = {
                 uuid: _device.Devices[0].uuid,
@@ -591,7 +584,6 @@ exports.getDevices = async (req, res) => {
 exports.loginBiometric = async (req, res) => {
     try {
         const { btp, uuid } = req.body;
-
         const device = await Device.findOne({
             where: {
                 uuid: uuid
@@ -603,11 +595,8 @@ exports.loginBiometric = async (req, res) => {
                 id: device.UserId
             }
         });
-        
         const bptBackend = CryptoJS.SHA256(uuid + user.dataValues.username).toString(CryptoJS.enc.Hex);
         if (btp != bptBackend) return res.status(400).send({ message: "Device not exists" });
-        console.log('bptBackend', bptBackend);
-        console.log('btp', btp);
         if (user.deleted) return res.status(400).send({ message: "ACCOUNT DELETED" });
         if (user.locked)
             if (user.lockUntil == 0)
@@ -676,14 +665,14 @@ exports.deleteDevice = async (req, res) => {
                 uuid: uuid
             }
         });
-        if (device.UserId != userId) return res.send({ message: 'This device does not belong to you' })
+        if (device.UserId != userId) return res.status(400).send({ message: res.i18n.t('Delete_device_400') })
 
         Device.destroy({
             where: {
                 uuid: uuid
             }
         });
-        return res.status(200).send({ message: 'Device deleted sucessfully' });
+        return res.status(200).send({ message: res.i18n.t('Delete_device_200') });
 
     } catch (err) {
         console.log(err);

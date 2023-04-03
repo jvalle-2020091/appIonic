@@ -29,7 +29,11 @@ module.exports = {
         delete_rol_400: "You can not delete this role",
         delete_rol_200: "Rol deleted successfully ",
 
-        Post_user_200: "Saved successfully"
+        Post_user_200: "Saved successfully",
+
+        // DEVICE 
+        Delete_device_400: "This device does not belong to you",
+        Delete_device_200: "Device deleted successfully"
     },
   
     'es': { // locale
@@ -61,6 +65,10 @@ module.exports = {
         delete_rol_400: "No puedes eliminar este rol",
         delete_rol_200: "Rol eliminado exitosamente ",
 
-        Post_user_200: "Cambios guardados exitosamente "
+        Post_user_200: "Cambios guardados exitosamente ",
+
+        // DEVICE 
+        Delete_device_400: "Este dispositivo no te pertenece",
+        Delete_device_200: "Dispositivo eliminado con éxito"
     }
   }

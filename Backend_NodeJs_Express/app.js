@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var roleRouter = require("./routes/rol");
 var functionRouter = require("./routes/functions");
+var customersRouter = require("./routes/customer");
 
 const message = require('./messages');
 
@@ -38,7 +39,8 @@ app.use(i18n.middleware);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/rols', roleRouter);
-app.use("/functions", functionRouter),
+app.use("/functions", functionRouter);
+app.use("/customers", customersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

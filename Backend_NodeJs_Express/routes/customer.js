@@ -6,6 +6,7 @@ const auth = require('../middlewares/auth');
 // Routes 
 router.post("/createCustomer", customerController.createCustomer);
 router.get("/getCustomers", customerController.getCustomers);
+router.get("/getCustomer/:id", customerController.getCustomer);
 router.put("/updateCustomer/:id", customerController.updateCustomer);
 router.delete("/deleteCustomer/:id", customerController.deleteCustomer);
 

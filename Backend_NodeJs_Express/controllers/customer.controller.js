@@ -79,3 +79,18 @@ exports.deleteCustomer = async (req, res) => {
         return error;
     }
 }
+
+exports.getCustomer = async (req, res) => {
+    try {
+        const idCustomer = req.params.id;
+        const customer = await Customer.findOne({
+            where: {
+                id: idCustomer
+            }
+        });
+        return res.status(200).send({ customer })
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+}
